@@ -1,3 +1,5 @@
+const express = require('express');
+const app = express();
 const axios = require('axios');
 const { MongoClient } = require('mongodb');
 
@@ -5,7 +7,9 @@ const uri = 'mongodb://127.0.0.1:27017'; // URL de conexión a MongoDB
 const dbName = 'myDatabase'; // Nombre de tu base de datos
 const collectionName = 'users'; // Nombre de la colección
 
-async function getUsersData(userId) {
+app.get('/users/:id', async (req, res) => {
+  const userId = req.params.id;
+
   try {
     const response = await axios.get(`https://jsonplaceholder.typicode.com/users/${userId}`);
     const userData = response.data;
@@ -32,11 +36,14 @@ async function getUsersData(userId) {
 
     console.log('User data:', userData);
     client.close(); // Cierra la conexión con MongoDB
+
+    res.status(200).json(userData);
   } catch (error) {
     console.error('Error retrieving user data:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
-}
+});
 
-const userId = 1; // Cambia el número de usuario según tus necesidades
-getUsersData(userId);
-
+app.listen(3000, () => {
+  console.log('Server listening on port 3000');
+});
